@@ -1,4 +1,11 @@
-from flask import Flask
+from flask import Flask, request
+from pymongo import MongoClient
+from mongopass import mongopass
+
+client = MongoClient(mongopass)
+db = client.reducto
+coll = db.users
+
 
 app = Flask(__name__)
 
