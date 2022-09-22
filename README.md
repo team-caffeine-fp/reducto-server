@@ -3,7 +3,7 @@
 ---
 ## Routes
 |Request|Path|Request| Response| Comment|
-|---|---|---|---|---|---|
+|---|---|---|---|---|
 |GET| `/`| `tbc`|`code: 200`|N/A|
 |GET| `/login`| `tbc`|`code: 200`|N/A|
 |POST| `/login`| `{ "username": [username], "password": [password] }`| `{ "bearer token": "Bearer [token]"}, code: 200`| N/A|
