@@ -1,6 +1,5 @@
 from flask import Flask, request
 from pymongo import MongoClient
-from mongopass import mongopass
 import certifi
 
 ca = certifi.where()
