@@ -9,6 +9,7 @@ pymongo = "*"
 werkzeug = "*"
 dnspython = "*"
 certifi = "*"
+gunicorn = "*"
 
 [dev-packages]
 
