@@ -1,7 +1,11 @@
 from flask import Flask, request
+import os
 from pymongo import MongoClient
+from dotenv import load_dotenv
 import certifi
 
+load_dotenv()
+mongopass = os.getenv('mongopass')
 ca = certifi.where()
 
 client = MongoClient(mongopass, tlsCAFile=ca)
