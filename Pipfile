@@ -19,4 +19,4 @@ python_version = "3.10"
 
 [scripts]
 dev = "flask run"
-start = "gunicorn application:app"
+start = "gunicorn app:application"
