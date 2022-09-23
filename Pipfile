@@ -11,6 +11,7 @@ dnspython = "*"
 certifi = "*"
 gunicorn = "*"
 python-dotenv = "*"
+datetime = "*"
 
 [dev-packages]
 
