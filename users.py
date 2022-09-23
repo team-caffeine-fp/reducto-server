@@ -1,10 +1,6 @@
 user_schema = {
-    'username': {
-       
-    },
-    'businessname': {
-       
-    },
+    'username': "",
+    'businessname': "",
     'travel flights': {
         'january': 0,
         'february': 0,
