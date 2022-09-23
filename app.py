@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import os
 import subprocess as sp
+from datetime import datetime
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import certifi
@@ -32,8 +33,10 @@ def get_users():
 
 @app.route('/dashboard/', methods=['GET'])
 def dashboard():
-    date = sp.getoutput("date /t")
-    return date
+    month = datetime.now().month
+    print(month)
+    return "the month"
+
 
 # Not finished
 @app.route('/login/', methods=['POST'])
@@ -53,7 +56,18 @@ def register():
 # Not finished
 @app.route('/form/', methods=['PUT'])
 def form():
-    return "thanks for letting us know about your co2"
+    user = request.form['username']
+    co2 = request.form['co2']
+    month = datetime.now().month
+    category = request.form["category"]
+    coll.update_one( { "username": user}, { '$inc': { f"{category}.{month}": int(co2) }})
+    return "User updated"
+
+    
+    
+        
+
+    # return "thanks for letting us know about your co2"
 
 
 if __name__ == '__main__':
