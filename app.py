@@ -40,7 +40,7 @@ def dashboard():
 def login():
     return "thanks for logging in"
 
-# Not finished
+# No auth
 @app.route('/register/', methods=['POST'])
 def register():
     username = request.form['username']
