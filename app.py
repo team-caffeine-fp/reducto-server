@@ -27,7 +27,7 @@ def index():
 def get_users():
     collection = coll.find()
     for user in collection:
-        print(user['name'])
+        print(user)
     
     return "showing all users"
 
@@ -63,12 +63,6 @@ def form():
     coll.update_one( { "username": user}, { '$inc': { f"{category}.{month}": int(co2) }})
     return "User updated"
 
-    
-    
-        
-
-    # return "thanks for letting us know about your co2"
-
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True) # pragma: no cover

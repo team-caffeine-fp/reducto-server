@@ -14,6 +14,8 @@ python-dotenv = "*"
 datetime = "*"
 
 [dev-packages]
+pytest = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.10"
@@ -21,3 +23,5 @@ python_version = "3.10"
 [scripts]
 dev = "flask run"
 start = "gunicorn app:app"
+test = "pytest ."
+coverage = "pytest --cov-report term-missing --cov=."
