@@ -1,4 +1,14 @@
-from flask import Flask
+from flask import Flask, request
+from pymongo import MongoClient
+from mongopass import mongopass
+import certifi
+
+ca = certifi.where()
+
+client = MongoClient(mongopass, tlsCAFile=ca)
+db = client.reducto
+coll = db.users
+
 
 app = Flask(__name__)
 
@@ -6,6 +16,14 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return "hello, welcome to reducto server"
+
+@app.route('/users/', methods=['GET'])
+def get_users():
+    collection = coll.find()
+    for user in collection:
+        print(user['name'])
+    
+    return "showing all users"
 
 @app.route('/dashboard/', methods=['GET'])
 def dashboard():

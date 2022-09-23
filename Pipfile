@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 flask = "*"
 pymongo = "*"
+werkzeug = "*"
+dnspython = "*"
+certifi = "*"
 
 [dev-packages]
 
