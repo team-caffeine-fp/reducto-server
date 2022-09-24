@@ -33,6 +33,7 @@ def doc2json(document):
 			json[k] = v
 	return json
 
+
 @api.route('/register', methods=['POST'])
 @api.route('/users', methods=['POST'])
 def create_user():
@@ -59,6 +60,7 @@ def create_user():
 
 	return jsonify(doc2json(user)), 200
 
+
 def login_required(f):
 	@wraps(f)
 	def wrapper(*args, **kwargs):
@@ -76,6 +78,7 @@ def login_required(f):
 		return f(*args, **kwargs)
 
 	return wrapper
+
 
 @api.route('/auth/login', methods=['POST'])
 def auth_login():
@@ -98,9 +101,82 @@ def auth_login():
 
 	return {'error': 'Password incorrect.'}, 400
 
+
 @api.route('/auth/logout', methods=['POST'])
 def auth_logout():
 	return jsonify({'logout': True}), 200
+
+
+@api.route('/users', methods=['GET'])
+def read_user_all():
+	users = [
+		doc2json(user)
+		for user
+		in db.users.find()
+	]
+
+	return jsonify(users)
+
+
+@api.route('/users', methods=['DELETE'])
+def delete_user_all():
+	db.users.delete_many({})
+
+	return 'deleted'
+
+
+@login_required
+@api.route('/users/<user_id>', methods=['GET'])
+def read_user(user_id):
+
+	user = doc2json(db.users.find_one({
+		'_id': ObjectId(user_id)
+	}))
+
+	del user['password']
+
+	return jsonify(user), 200
+
+
+@api.route('/users/<user_id>', methods=['PUT'])
+def update_user(user_id):
+	data = request.get_json()
+
+	username = data['username']
+	password = data['password']
+	name = data['name']
+	email = data['email']
+	image = data['image']
+
+	user = db.users.find_one({'username': username})
+	if user and str(user['_id']) != user_id:
+		return jsonify({'error': 'This username already exists.'}), 400
+
+	upserted_id = db.users.update_one({
+		'_id': ObjectId(user_id)
+	}, {'$set': {
+		'username': username,
+		'password': generate_password_hash(password),
+		'name': name,
+		'email': email,
+		'image': image,
+	}}).upserted_id
+
+	user = db.users.find_one({'_id': ObjectId(user_id)})
+
+	return jsonify(doc2json(user)), 200
+
+
+@api.route('/users/<user_id>', methods=['DELETE'])
+def delete_user(user_id):
+	count = db.users.delete_one({
+		'_id': ObjectId(user_id)
+	}).deleted_count
+
+	if count == 0:
+		return jsonify({'error': 'No emissions to delete.'}), 400
+
+	return jsonify(), 200
 
 if __name__ == '__main__':
     app.run(debug=True) # pragma: no cover
