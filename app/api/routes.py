@@ -59,6 +59,23 @@ def create_user():
 
 	return jsonify(doc2json(user)), 200
 
+def login_required(f):
+	@wraps(f)
+	def wrapper(*args, **kwargs):
+		user_id = kwargs['user_id']
+		auth = request.headers.get('Authorization')
+
+		try:
+			token = auth.split(' ')[1]
+			payload = jwt.decode(token, current_app.config.get('SECRET_KEY'), algorithms=['HS256'])
+			assert user_id == payload['_id']
+		except:
+			return jsonify({'error': 'Invalid credentials.'}), 400
+
+
+		return f(*args, **kwargs)
+
+	return wrapper
 
 if __name__ == '__main__':
     app.run(debug=True) # pragma: no cover
