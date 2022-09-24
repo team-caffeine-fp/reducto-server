@@ -77,5 +77,30 @@ def login_required(f):
 
 	return wrapper
 
+@api.route('/auth/login', methods=['POST'])
+def auth_login():
+	data = request.get_json()
+
+	username = data['username']
+	password = data['password']
+
+	user = db.users.find_one({'username': username})
+
+	if not user:
+		return {'error': 'Username does not exist.'}, 400
+
+	if check_password_hash(user['password'], password):
+		token = jwt.encode({
+			'_id': str(user['_id'])
+		}, current_app.config.get('SECRET_KEY'))
+
+		return jsonify({'token': token, '_id': str(user['_id'])}), 200
+
+	return {'error': 'Password incorrect.'}, 400
+
+@api.route('/auth/logout', methods=['POST'])
+def auth_logout():
+	return jsonify({'logout': True}), 200
+
 if __name__ == '__main__':
     app.run(debug=True) # pragma: no cover
