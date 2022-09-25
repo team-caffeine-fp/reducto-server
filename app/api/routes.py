@@ -139,13 +139,17 @@ def auth_logout():
 	return jsonify(), 200
 
 
-@login_required
 @api.route('/users/<user_id>', methods=['GET'])
+@login_required
 def read_user(user_id):
-
-	user = doc2json(db.users.find_one({
-		'_id': ObjectId(user_id)
-	}))
+	try:
+		user = doc2json(db.users.find_one({
+			'_id': ObjectId(user_id)
+		}))
+		assert user
+	
+	except: 
+		return jsonify({'error': 'User not found.'}), 404
 
 	del user['password']
 
@@ -153,28 +157,25 @@ def read_user(user_id):
 
 
 @api.route('/users/<user_id>', methods=['PUT'])
+@login_required
 def update_user(user_id):
 	data = request.get_json()
 
-	username = data['username']
-	password = data['password']
-	name = data['name']
-	email = data['email']
-	image = data['image']
+	if 'password' in data:
+		data['password'] = generate_password_hash(data['password'])
 
-	user = db.users.find_one({'username': username})
-	if user and str(user['_id']) != user_id:
-		return jsonify({'error': 'This username already exists.'}), 400
+	if 'username' in data:
+		user = db.users.find_one({'username': data['username']})
+		if user and str(user['_id']) != user_id:
+			return jsonify({'error': 'Username already exists.'}), 400
 
-	upserted_id = db.users.update_one({
-		'_id': ObjectId(user_id)
-	}, {'$set': {
-		'username': username,
-		'password': generate_password_hash(password),
-		'name': name,
-		'email': email,
-		'image': image,
-	}}).upserted_id
+	try:
+		count = db.users.update_one({
+			'_id': ObjectId(user_id)
+		}, {'$set': data}).matched_count
+		assert count != 0
+	except: 
+		return jsonify({'error': 'User not found.'}), 404 
 
 	user = db.users.find_one({'_id': ObjectId(user_id)})
 
@@ -182,13 +183,16 @@ def update_user(user_id):
 
 
 @api.route('/users/<user_id>', methods=['DELETE'])
+@login_required
 def delete_user(user_id):
-	count = db.users.delete_one({
-		'_id': ObjectId(user_id)
-	}).deleted_count
+	try:
+		count = db.users.delete_one({
+			'_id': ObjectId(user_id)
+		}).deleted_count
 
-	if count == 0:
-		return jsonify({'error': 'No emissions to delete.'}), 400
+		assert count != 0
+	except:
+		return jsonify({'error': 'User not found.'}), 404
 
 	return jsonify(), 200
 
