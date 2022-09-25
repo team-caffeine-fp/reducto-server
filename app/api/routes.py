@@ -12,6 +12,7 @@ from functools import wraps
 import requests
 from app.api import api
 import pymongo
+from datetime import datetime, timedelta
 
 load_dotenv()
 mongopass = os.getenv('mongopass')
@@ -70,10 +71,13 @@ def login_required(f):
 		try:
 			token = auth.split(' ')[1]
 			payload = jwt.decode(token, current_app.config.get('SECRET_KEY'), algorithms=['HS256'])
-			assert user_id == payload['_id']
-		except:
-			return jsonify({'error': 'Invalid credentials.'}), 400
+			user = db.users.find_one({'_id': ObjectId(user_id)})
 
+			assert user
+			assert user_id == payload['_id']
+			assert user['token'] == token
+		except:
+			return jsonify({'error': 'Invalid credentials.'}), 401
 
 		return f(*args, **kwargs)
 
@@ -84,22 +88,30 @@ def login_required(f):
 def auth_login():
 	data = request.get_json()
 
-	username = data['username']
-	password = data['password']
+	try:
+		username = data['username']
+		password = data['password']
+	except:
+		return jsonify({'error': 'Missing fields.'}), 400
 
 	user = db.users.find_one({'username': username})
 
 	if not user:
-		return {'error': 'Username does not exist.'}, 400
+		return jsonify({'error': 'Username does not exist.'}), 400
 
 	if check_password_hash(user['password'], password):
 		token = jwt.encode({
-			'_id': str(user['_id'])
+			'_id': str(user['_id']),
+			'exp': datetime.now() + timedelta(hours=1)
 		}, current_app.config.get('SECRET_KEY'))
+
+		db.users.update_one({'_id': user['_id']}, {'$set': {
+			'token': token
+		}})
 
 		return jsonify({'token': token, '_id': str(user['_id'])}), 200
 
-	return {'error': 'Password incorrect.'}, 400
+	return jsonify({'error': 'Password is incorrect.'}), 400
 
 
 @api.route('/auth/logout', methods=['POST'])
