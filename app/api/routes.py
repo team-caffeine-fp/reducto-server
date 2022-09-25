@@ -40,14 +40,17 @@ def doc2json(document):
 def create_user():
 	data = request.get_json()
 
-	username = data['username']
-	password = data['password']
-	name = data['name']
-	email = data['email']
-	image = data['image']
+	try:
+		username = data['username']
+		password = data['password']
+		name = data['name']
+		email = data['email']
+		image = data['image']
+	except:
+		return jsonify({'error': 'Missing fields.'}), 400
 
 	if db.users.find_one({'username': username}):
-		return jsonify({'error': 'This username already exists.'}), 400
+		return jsonify({'error': 'Username already exists.'}), 400
 
 	inserted_id = db.users.insert_one({
 		'username': username,
@@ -55,6 +58,7 @@ def create_user():
 		'name': name,
 		'email': email,
 		'image': image,
+		'token': ''
 	}).inserted_id
 
 	user = db.users.find_one({'_id': inserted_id})
@@ -116,25 +120,23 @@ def auth_login():
 
 @api.route('/auth/logout', methods=['POST'])
 def auth_logout():
-	return jsonify({'logout': True}), 200
+	auth = request.headers.get('Authorization')
 
+	try:
+		token = auth.split(' ')[1]
+		payload = jwt.decode(token, current_app.config.get('SECRET_KEY'), algorithms=['HS256'])
+		user = db.users.find_one({'_id': ObjectId(payload['_id'])})
 
-@api.route('/users', methods=['GET'])
-def read_user_all():
-	users = [
-		doc2json(user)
-		for user
-		in db.users.find()
-	]
+		assert user
+		assert user['token'] == token
 
-	return jsonify(users)
+		db.users.update_one({'_id': ObjectId(payload['_id'])}, {'$set': {
+			'token': ''
+		}})
+	except:
+		return jsonify({'error': 'Invalid credentials.'}), 401
 
-
-@api.route('/users', methods=['DELETE'])
-def delete_user_all():
-	db.users.delete_many({})
-
-	return 'deleted'
+	return jsonify(), 200
 
 
 @login_required
