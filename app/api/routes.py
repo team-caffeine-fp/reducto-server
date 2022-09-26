@@ -35,7 +35,7 @@ def doc2json(document):
 			json[k] = v
 	return json
 
-
+# Route to register a new user
 @api.route('/register', methods=['POST'])
 @api.route('/users', methods=['POST'])
 def create_user():
@@ -44,7 +44,8 @@ def create_user():
 	try:
 		username = data['username']
 		password = data['password']
-		bname = data['bname']
+		email = data['email']
+		bname = data['businessname']
 	except:
 		return jsonify({'error': 'Missing fields.'}), 400
 
@@ -53,6 +54,7 @@ def create_user():
 
 	user_schema["username"] = username
 	user_schema["password"] = generate_password_hash(password)
+	user_schema["email"] = email
 	user_schema["businessname"] = bname
 	db.users.insert_one(user_schema)
 
@@ -80,7 +82,7 @@ def login_required(f):
 
 	return wrapper
 
-
+# Route to login
 @api.route('/auth/login', methods=['POST'])
 def auth_login():
 	data = request.get_json()
@@ -110,7 +112,7 @@ def auth_login():
 
 	return jsonify({'error': 'Password is incorrect.'}), 400
 
-
+# Route to logout
 @api.route('/auth/logout', methods=['POST'])
 def auth_logout():
 	auth = request.headers.get('Authorization')
@@ -149,7 +151,7 @@ def read_user(user_id):
 	return jsonify(user), 200
 
 
-@api.route('/users/<user_id>', methods=['PUT'])
+@api.route('/users/<user_id>/update', methods=['PUT'])
 @login_required
 def update_user(user_id):
 	data = request.get_json()
@@ -188,6 +190,17 @@ def delete_user(user_id):
 		return jsonify({'error': 'User not found.'}), 404
 
 	return jsonify(), 200
+
+
+# Not finished
+@app.route('/users/<user_id>', methods=['PUT'])
+@login_required
+def form(user_id):
+    co2 = request.form['co2']
+    month = datetime.now().month
+    category = request.form["category"]
+    db.users.update_one( { "_id": user_id}, { '$inc': { f"{category}.{month}": int(co2) }})
+    return "User updated", 200
 
 if __name__ == '__main__':
     app.run(debug=True) # pragma: no cover

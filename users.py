@@ -2,6 +2,7 @@ user_schema = {
     'username': "",
     'businessname': "",
     'password': '',
+    'email': '',
     'token': '',
     'travel flights': {
         '1': 0,
