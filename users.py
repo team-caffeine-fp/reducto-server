@@ -1,6 +1,10 @@
-user_schema = {
+user_schema = { 
     'username': "",
     'businessname': "",
+    'password': '',
+    'email': '',
+    'token': '',
+
     'travel flights': {
         '1': 0,
         '2': 0,
