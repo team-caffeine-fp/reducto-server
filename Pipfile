@@ -12,8 +12,8 @@ certifi = "*"
 gunicorn = "*"
 python-dotenv = "*"
 flask-cors = "*"
-jwt = "*"
 requests = "*"
+pyjwt = "*"
 
 [dev-packages]
 pytest = "*"
