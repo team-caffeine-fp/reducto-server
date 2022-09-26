@@ -193,14 +193,18 @@ def delete_user(user_id):
 
 
 # Not finished
-@app.route('/users/<user_id>', methods=['PUT'])
+@api.route('/users/<user_id>/emissions', methods=['PUT'])
 @login_required
 def form(user_id):
-    co2 = request.form['co2']
-    month = datetime.now().month
-    category = request.form["category"]
-    db.users.update_one( { "_id": user_id}, { '$inc': { f"{category}.{month}": int(co2) }})
-    return "User updated", 200
+	data = request.get_json()
+	co2 = data["co2"]
+	month = datetime.now().month
+	category = data["category"]
+	print(co2)
+	print(category)
+	print(month)
+	db.users.update_one( { "_id": ObjectId(user_id) }, { '$inc': { f"{category}.{month}": int(co2) }})
+	return "User updated", 200
 
 if __name__ == '__main__':
     app.run(debug=True) # pragma: no cover
