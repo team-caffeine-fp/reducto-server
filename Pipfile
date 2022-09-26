@@ -9,11 +9,21 @@ pymongo = "*"
 werkzeug = "*"
 dnspython = "*"
 certifi = "*"
+gunicorn = "*"
+python-dotenv = "*"
+flask-cors = "*"
+jwt = "*"
+requests = "*"
 
 [dev-packages]
+pytest = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.10"
 
 [scripts]
-dev = "flask run"
+start = "gunicorn app:app"
+dev = "bash -c \"export FLASK_ENV='development' && flask run --host=0.0.0.0\""
+test = "pytest ."
+coverage = "pytest --cov-report term-missing --cov=."
