@@ -4,6 +4,7 @@ user_schema = {
     'password': '',
     'email': '',
     'token': '',
+
     'travel flights': {
         '1': 0,
         '2': 0,

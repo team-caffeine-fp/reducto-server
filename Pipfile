@@ -11,9 +11,11 @@ dnspython = "*"
 certifi = "*"
 gunicorn = "*"
 python-dotenv = "*"
+
 flask-cors = "*"
 requests = "*"
 pyjwt = "*"
+
 
 [dev-packages]
 pytest = "*"
