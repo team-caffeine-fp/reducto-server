@@ -24,7 +24,7 @@ db = client.reducto
 
 app = Flask(__name__)
 
-
+# Convert _id field to string
 def doc2json(document):
 	json = {}
 	for k, v in document.items():
@@ -43,9 +43,8 @@ def create_user():
 	try:
 		username = data['username']
 		password = data['password']
-		name = data['name']
+		businessname = data['businessname']
 		email = data['email']
-		image = data['image']
 	except:
 		return jsonify({'error': 'Missing fields.'}), 400
 
@@ -55,9 +54,8 @@ def create_user():
 	inserted_id = db.users.insert_one({
 		'username': username,
 		'password': generate_password_hash(password),
-		'name': name,
+		'businessname': businessname,
 		'email': email,
-		'image': image,
 		'token': ''
 	}).inserted_id
 
