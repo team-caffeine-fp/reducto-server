@@ -13,6 +13,7 @@ import requests
 from app.api import api
 import pymongo
 from datetime import datetime, timedelta
+from users import user_schema
 
 load_dotenv()
 mongopass = os.getenv('mongopass')
@@ -43,27 +44,19 @@ def create_user():
 	try:
 		username = data['username']
 		password = data['password']
-		name = data['name']
-		email = data['email']
-		image = data['image']
+		bname = data['bname']
 	except:
 		return jsonify({'error': 'Missing fields.'}), 400
 
 	if db.users.find_one({'username': username}):
 		return jsonify({'error': 'Username already exists.'}), 400
 
-	inserted_id = db.users.insert_one({
-		'username': username,
-		'password': generate_password_hash(password),
-		'name': name,
-		'email': email,
-		'image': image,
-		'token': ''
-	}).inserted_id
+	user_schema["username"] = username
+	user_schema["password"] = generate_password_hash(password)
+	user_schema["businessname"] = bname
+	db.users.insert_one(user_schema)
 
-	user = db.users.find_one({'_id': inserted_id})
-
-	return jsonify(doc2json(user)), 200
+	return jsonify(doc2json(user_schema)), 200
 
 
 def login_required(f):
