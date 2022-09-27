@@ -56,7 +56,7 @@ def create_user():
 	user_schema["password"] = generate_password_hash(password)
 	user_schema["email"] = email
 	user_schema["businessname"] = bname
-	db.users.insert_one(user_schema)
+	db.users.update_one(user_schema, upsert=True)
 
 	return jsonify(doc2json(user_schema)), 200
 
