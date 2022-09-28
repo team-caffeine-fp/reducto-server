@@ -12,8 +12,9 @@ from functools import wraps
 import requests
 from app.api import api
 import pymongo
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from users import user_schema
+
 
 load_dotenv()
 mongopass = os.getenv('mongopass')
@@ -101,7 +102,7 @@ def auth_login():
 	if check_password_hash(user['password'], password):
 		token = jwt.encode({
 			'_id': str(user['_id']),
-			# 'exp': datetime.now() + timedelta(hours=1)
+			'exp': datetime.now(tz=timezone.utc) + timedelta(hours=2)
 		}, current_app.config.get('SECRET_KEY'))
 
 		db.users.update_one({'_id': user['_id']}, {'$set': {
@@ -143,8 +144,8 @@ def read_user(user_id):
 		}))
 		assert user
 	
-	except: 
-		return jsonify({'error': 'User not found.'}), 404
+	except: # pragma: no cover
+		return jsonify({'error': 'User not found.'}), 404 # pragma: no cover
 
 	del user['password']
 
@@ -169,8 +170,8 @@ def update_user(user_id):
 			'_id': ObjectId(user_id)
 		}, {'$set': data}).matched_count
 		assert count != 0
-	except: 
-		return jsonify({'error': 'User not found.'}), 404 
+	except: # pragma: no cover
+		return jsonify({'error': 'User not found.'}), 404 # pragma: no cover
 
 	user = db.users.find_one({'_id': ObjectId(user_id)})
 
@@ -186,10 +187,11 @@ def delete_user(user_id):
 		}).deleted_count
 
 		assert count != 0
-	except:
-		return jsonify({'error': 'User not found.'}), 404
+	except: # pragma: no cover
+		return jsonify({'error': 'User not found.'}), 404 # pragma: no cover
 
 	return jsonify(), 200
+
 
 
 # Not finished
@@ -205,6 +207,7 @@ def form(user_id):
 	print(month)
 	db.users.update_one( { "_id": ObjectId(user_id) }, { '$inc': { f"{category}.{month}": int(co2) }})
 	return "User updated", 200
+
 
 if __name__ == '__main__':
     app.run(debug=True) # pragma: no cover
