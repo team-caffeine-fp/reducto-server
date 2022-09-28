@@ -13,6 +13,8 @@ import requests
 from app.api import api
 import pymongo
 from datetime import datetime, timedelta, timezone
+from users import user_schema
+
 
 load_dotenv()
 mongopass = os.getenv('mongopass')
@@ -24,7 +26,7 @@ db = client.reducto
 
 app = Flask(__name__)
 
-# Convert _id field to string
+
 def doc2json(document):
 	json = {}
 	for k, v in document.items():
@@ -34,7 +36,7 @@ def doc2json(document):
 			json[k] = v
 	return json
 
-
+# Route to register a new user
 @api.route('/register', methods=['POST'])
 @api.route('/users', methods=['POST'])
 def create_user():
@@ -43,25 +45,21 @@ def create_user():
 	try:
 		username = data['username']
 		password = data['password']
-		businessname = data['businessname']
 		email = data['email']
+		bname = data['businessname']
 	except:
 		return jsonify({'error': 'Missing fields.'}), 400
 
 	if db.users.find_one({'username': username}):
 		return jsonify({'error': 'Username already exists.'}), 400
 
-	inserted_id = db.users.insert_one({
-		'username': username,
-		'password': generate_password_hash(password),
-		'businessname': businessname,
-		'email': email,
-		'token': ''
-	}).inserted_id
+	user_schema["username"] = username
+	user_schema["password"] = generate_password_hash(password)
+	user_schema["email"] = email
+	user_schema["businessname"] = bname
+	db.users.update_one(user_schema,{ '$set':user_schema}, upsert=True)
 
-	user = db.users.find_one({'_id': inserted_id})
-
-	return jsonify(doc2json(user)), 200
+	return jsonify(doc2json(user_schema)), 200
 
 
 def login_required(f):
@@ -85,7 +83,7 @@ def login_required(f):
 
 	return wrapper
 
-
+# Route to login
 @api.route('/auth/login', methods=['POST'])
 def auth_login():
 	data = request.get_json()
@@ -115,7 +113,7 @@ def auth_login():
 
 	return jsonify({'error': 'Password is incorrect.'}), 400
 
-
+# Route to logout
 @api.route('/auth/logout', methods=['POST'])
 def auth_logout():
 	auth = request.headers.get('Authorization')
@@ -154,7 +152,7 @@ def read_user(user_id):
 	return jsonify(user), 200
 
 
-@api.route('/users/<user_id>', methods=['PUT'])
+@api.route('/users/<user_id>/update', methods=['PUT'])
 @login_required
 def update_user(user_id):
 	data = request.get_json()
@@ -193,6 +191,22 @@ def delete_user(user_id):
 		return jsonify({'error': 'User not found.'}), 404 # pragma: no cover
 
 	return jsonify(), 200
+
+
+
+# Not finished
+@api.route('/users/<user_id>/emissions', methods=['PUT'])
+@login_required
+def form(user_id):
+	data = request.get_json()
+	co2 = data["co2"]
+	month = datetime.now().month
+	category = data["category"]
+	print(co2)
+	print(category)
+	print(month)
+	db.users.update_one( { "_id": ObjectId(user_id) }, { '$inc': { f"{category}.{month}": int(co2) }})
+	return "User updated", 200
 
 
 if __name__ == '__main__':
