@@ -26,15 +26,8 @@ def client():
 		'token': ''
 	}).inserted_id
 
-	emission_id = db.emissions.insert_one({
-		'user_id': user_id,
-		'category': 'Flights',
-		'timestamp': '2022-09-18',
-		'co2e': 100
-	}).inserted_id
 
 	app.config['user_id'] = user_id
-	app.config['emission_id'] = emission_id
 
 	yield app.test_client()
 
