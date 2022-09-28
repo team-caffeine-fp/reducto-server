@@ -24,8 +24,6 @@ client = MongoClient(mongopass, tlsCAFile=ca)
 db = client.reducto
 
 
-app = Flask(__name__)
-
 
 def doc2json(document):
 	json = {}
@@ -209,5 +207,3 @@ def form(user_id):
 	return "User updated", 200
 
 
-if __name__ == '__main__':
-    app.run(debug=True) # pragma: no cover
