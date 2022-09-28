@@ -146,8 +146,8 @@ def read_user(user_id):
 		}))
 		assert user
 	
-	except: 
-		return jsonify({'error': 'User not found.'}), 404
+	except: # pragma: no cover
+		return jsonify({'error': 'User not found.'}), 404 # pragma: no cover
 
 	del user['password']
 
@@ -172,8 +172,8 @@ def update_user(user_id):
 			'_id': ObjectId(user_id)
 		}, {'$set': data}).matched_count
 		assert count != 0
-	except: 
-		return jsonify({'error': 'User not found.'}), 404 
+	except: # pragma: no cover
+		return jsonify({'error': 'User not found.'}), 404 # pragma: no cover
 
 	user = db.users.find_one({'_id': ObjectId(user_id)})
 
@@ -189,94 +189,10 @@ def delete_user(user_id):
 		}).deleted_count
 
 		assert count != 0
-	except:
-		return jsonify({'error': 'User not found.'}), 404
+	except: # pragma: no cover
+		return jsonify({'error': 'User not found.'}), 404 # pragma: no cover
 
 	return jsonify(), 200
-
-
-@api.route('/users/<user_id>/emissions', methods=['GET'])
-@login_required
-def read_emission_all(user_id):
-    emissions = [
-        doc2json(emission)
-        for emission
-        in db.emissions.find({ 'user_id': ObjectId(user_id)})
-    ]
-
-    return jsonify(emissions), 200
-
-
-@api.route('/users/<user_id>/emissions', methods=['POST'])
-@login_required
-def create_emission(user_id):
-
-    data = request.get_json()
-
-    inserted_id = db.emissions.insert_one({
-        'user_id': ObjectId(user_id),
-        'category': data['category'],
-        'timestamp': data['timestamp'],
-        'co2e': data['co2e'] 
-    }).inserted_id
-
-    emission = db.emissions.find_one({'_id': inserted_id})
-
-    return jsonify(doc2json(emission)), 200
-
-
-
-
-@api.route('/users/<user_id>/emissions/<emission_id>', methods=['GET'])
-@login_required
-def read_emission(user_id, emission_id):
-    try:
-        emission = db.emissions.find_one({
-            '_id': ObjectId(emission_id),
-            'user_id': ObjectId(user_id)
-        })
-        assert emission
-    except:
-        return jsonify({'error': 'Emission not found.'}), 404
-
-    return jsonify(doc2json(emission)), 200
-
-
-@api.route('/users/<user_id>/emissions/<emission_id>', methods=['PUT'])
-@login_required
-def update_emission(user_id, emission_id):
-    
-    data = request.get_json()
-
-    try:
-        count = db.emissions.update_one({
-            '_id': ObjectId(emission_id),
-            'user_id': ObjectId(user_id)
-        }, {'$set': data}).matched_count
-
-        assert count != 0
-    except: 
-        return jsonify({'error': 'Emission not found.'}), 404 
-
-    emission = db.emissions.find_one({'_id': ObjectId(emission_id)})
-
-    return jsonify(doc2json(emission)), 200
-
-
-@api.route('/users/<user_id>/emissions/<emission_id>', methods=['DELETE'])
-@login_required
-def delete_emission(user_id, emission_id):
-    try:
-        count = db.emissions.delete_one({
-            '_id': ObjectId(emission_id),
-            'user_id': ObjectId(user_id)
-        }).deleted_count
-
-        assert count != 0
-    except:
-        return jsonify({'error': 'Emission not found.'}), 404
-
-    return jsonify(), 200
 
 
 if __name__ == '__main__':

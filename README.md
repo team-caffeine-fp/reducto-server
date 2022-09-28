@@ -10,3 +10,4 @@
 |POST| `'/register'`| `{ "username": [username], "password": [password], "business_name": [business_name] }` | `{ "bearer token": "Bearer [token]"}, code: 201`| N/A|
 |POST| `'/form'`| `{ "bearer token": "Bearer [token]"} and other stuff` | `{ "bearer token": "Bearer [token]"}, code: 201`| N/A|
 |PUT| `'/admin'`| `{ "username": [username], "password": [password], "business_name": [business_name] }` | `{ "bearer token": "Bearer [token]"}, code: 201`| Change the user data - not a main goal atm|
+
