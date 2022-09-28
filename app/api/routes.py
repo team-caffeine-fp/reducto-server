@@ -101,7 +101,7 @@ def auth_login():
 	if check_password_hash(user['password'], password):
 		token = jwt.encode({
 			'_id': str(user['_id']),
-			'exp': datetime.now() + timedelta(hours=1)
+			# 'exp': datetime.now() + timedelta(hours=1)
 		}, current_app.config.get('SECRET_KEY'))
 
 		db.users.update_one({'_id': user['_id']}, {'$set': {
